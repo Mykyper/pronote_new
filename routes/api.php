@@ -30,10 +30,19 @@ Route::get('/users', [UserController::class, 'all']);
 # ================================
 # Étudiants
 # ================================
-Route::get('/students/create', [StudentController::class, 'create']);
-Route::post('/students', [StudentController::class, 'store']);
-Route::get('/students', [StudentController::class, 'index']);
-Route::post('/student-login', [StudentAuthController::class, 'login']);
+Route::get('/student-login-form', [StudentAuthController::class, 'showLoginForm'])->name('student.login.form');
+Route::post('/student-login', [StudentAuthController::class, 'login'])->name('student.login');
+
+// Vue pour l’interface après connexion
+Route::get('/student-interface', function () {
+    return view('student-interface'); // ta vue Blade avec le tableau et JS
+})->name('student-inter')->middleware('web');
+
+// API pour récupérer l’emploi du temps
+Route::get('/student/emploi', [StudentAuthController::class, 'show'])
+    ->name('student.api.emploi')
+    ->middleware('web');
+
 
 # ================================
 # Enseignants

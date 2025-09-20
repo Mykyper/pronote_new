@@ -5,38 +5,39 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Eleve;
 use App\Models\Seance;
-use Carbon\Carbon;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Http\JsonResponse;
+
 class StudentAuthController extends Controller
 {
-    // Afficher le formulaire de connexion
+    // Formulaire de connexion
     public function showLoginForm()
     {
         return view('eleve_log');
     }
 
-    // Traiter la connexion
-     public function login(Request $request): JsonResponse
+    // Login
+    public function login(Request $request): JsonResponse
     {
         $credentials = $request->only('email', 'password');
 
-        // Vérifiez les identifiants
         $eleve = Eleve::where('email', $credentials['email'])->first();
 
-        if ($eleve && password_verify($credentials['password'], $eleve->password)) {
-            // Authentifier l'utilisateur et stocker son ID dans la session ou token
-            
+        if ($eleve && Hash::check($credentials['password'], $eleve->password)) {
+            // Stocker l'id élève dans la session
+            $request->session()->put('student_id', $eleve->id);
 
             return response()->json([
                 'success' => true,
                 'message' => 'Connexion réussie',
+                'redirect' => route('student-inter'),
                 'student' => [
                     'id' => $eleve->id,
                     'nom' => $eleve->nom,
                     'prenom' => $eleve->prenom,
                     'classe_id' => $eleve->classe_id
                 ]
-            ]);
+            ], 200);
         }
 
         return response()->json([
@@ -45,13 +46,21 @@ class StudentAuthController extends Controller
         ], 401);
     }
 
-    /**
-     * Récupérer l'emploi du temps de l'élève (API)
-     */
-    public function show(Request $request): JsonResponse
+    // Interface élève
+    public function interface(Request $request)
+    {
+        // Vérifier que l'élève est connecté
+        if (!$request->session()->has('student_id')) {
+            return redirect()->route('student.login.form');
+        }
+
+        return view('eleve_interface');
+    }
+
+    // Récupérer l'emploi du temps (API)
+    public function showEmploi(Request $request): JsonResponse
     {
         $studentId = $request->session()->get('student_id');
-
         if (!$studentId) {
             return response()->json([
                 'success' => false,
@@ -69,32 +78,25 @@ class StudentAuthController extends Controller
 
         $classId = $eleve->classe_id;
 
-        // Récupérer les 10 dates les plus récentes pour la classe
         $recentDates = Seance::where('class_id', $classId)
-            ->orderBy('date', 'asc')
-            ->take(10)
+            ->orderBy('date', 'desc')
             ->pluck('date')
             ->unique()
+            ->take(10)
             ->toArray();
 
+        $seances = Seance::where('class_id', $classId)
+            ->whereIn('date', $recentDates)
+            ->orderBy('date', 'asc')
+            ->orderBy('periode', 'asc')
+            ->get()
+            ->groupBy('date');
+
         $emploiDuTemps = [];
-
-        foreach ($recentDates as $date) {
-            $seancesMatin = Seance::where('class_id', $classId)
-                ->whereDate('date', $date)
-                ->where('periode', 'matin')
-                ->orderBy('created_at', 'desc')
-                ->get();
-
-            $seancesSoir = Seance::where('class_id', $classId)
-                ->whereDate('date', $date)
-                ->where('periode', 'soir')
-                ->orderBy('created_at', 'desc')
-                ->get();
-
+        foreach ($seances as $date => $listeSeances) {
             $emploiDuTemps[$date] = [
-                'matin' => $seancesMatin,
-                'soir' => $seancesSoir
+                'matin' => $listeSeances->where('periode', 'matin')->values(),
+                'soir' => $listeSeances->where('periode', 'soir')->values()
             ];
         }
 
@@ -107,6 +109,7 @@ class StudentAuthController extends Controller
                 'classe_id' => $classId
             ],
             'emploiDuTemps' => $emploiDuTemps
-        ]);
+        ], 200);
     }
 }
+

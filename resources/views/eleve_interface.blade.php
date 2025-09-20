@@ -7,13 +7,7 @@
   <title>Pronote Ifran</title>
   <link rel="stylesheet" href="{{ asset('css/interface.css') }}">
   <style>
- 
-    .header-right {
-      display: flex;
-      align-items: center;
-    }
-
-    
+    /* Bouton de déconnexion */
     .logout-button {
       background-color: #dc3545;
       color: white;
@@ -29,11 +23,23 @@
       background-color: #c82333;
     }
 
-    /* Style pour le nom de l'élève */
+    /* Conteneur nom + bouton */
+    .header-right {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
     .student-name {
       font-size: 16px;
       font-weight: bold;
-      margin-right: 20px; /* Espacement entre le nom de l'élève et le bouton de déconnexion */
+      margin: 0;
+    }
+
+    /* Style "Aucun cours" */
+    .empty-course {
+      color: gray;
+      font-style: italic;
     }
   </style>
 </head>
@@ -41,9 +47,9 @@
 <body>
   <div class="app">
     <header class="header">
-      <div class="title">Pronote Ifran</div>
+      <div class="title">Pronote Ifran- Espace Etudiant </div>
       <div class="header-right">
-        <div class="student-name">{{ $studentName }}</div>
+        <div class="student-name" id="student-name">Chargement...</div>
         <form action="{{ route('logout') }}" method="POST" style="display: inline;">
           @csrf
           <button type="submit" class="logout-button">Déconnexion</button>
@@ -57,43 +63,24 @@
           <li class="menu-item active">
             <span class="icon">&#128197;</span> Emploi du temps
           </li>
-         
         </ul>
       </aside>
 
       <main class="main-content">
         <div class="timetable">
-          <table>
+          <table id="timetable">
             <thead>
               <tr>
                 <th>Jour</th>
-                @foreach(array_keys($emploiDuTemps) as $date)
-                  <th>{{ \Carbon\Carbon::parse($date)->format('d/m/Y') }}</th>
-                @endforeach
+                <!-- Colonnes dynamiques -->
               </tr>
             </thead>
             <tbody>
-              <tr>
+              <tr id="row-matin">
                 <td>MATIN 9H00 - 12H00</td>
-                @foreach($emploiDuTemps as $date => $sessions)
-                  <td>
-                    @foreach($sessions['matin'] as $seance)
-                      {{ $seance->module->nom }}<br>
-                      {{ $seance->enseignant->nom }}<br>
-                    @endforeach
-                  </td>
-                @endforeach
               </tr>
-              <tr>
+              <tr id="row-soir">
                 <td>APRES-MIDI 14H00 - 17H00</td>
-                @foreach($emploiDuTemps as $date => $sessions)
-                  <td>
-                    @foreach($sessions['soir'] as $seance)
-                      {{ $seance->module->nom }}<br>
-                      {{ $seance->enseignant->nom }}<br>
-                    @endforeach
-                  </td>
-                @endforeach
               </tr>
             </tbody>
           </table>
@@ -101,6 +88,81 @@
       </main>
     </div>
   </div>
+
+  <!-- Axios pour requêtes API -->
+  <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+  <script>
+    document.addEventListener("DOMContentLoaded", async () => {
+      try {
+        // Appel à l'API pour récupérer l'emploi du temps
+        const response = await axios.get("{{ route('student.api.emploi') }}");
+
+        console.log(response.data); // Debug : vérifier la réponse
+
+        if (response.data.success) {
+          const student = response.data.student;
+          const emploiDuTemps = response.data.emploiDuTemps;
+
+          // Afficher le nom de l'élève
+          const studentNameDiv = document.getElementById("student-name");
+          if (studentNameDiv && student?.prenom && student?.nom) {
+            studentNameDiv.textContent = `${student.prenom} ${student.nom}`;
+          } else {
+            studentNameDiv.textContent = "Élève non trouvé";
+          }
+
+          // Sélection des lignes du tableau
+          const headerRow = document.querySelector("#timetable thead tr");
+          const rowMatin = document.getElementById("row-matin");
+          const rowSoir = document.getElementById("row-soir");
+
+          // Vider les anciennes colonnes
+          headerRow.innerHTML = "<th>Jour</th>";
+          rowMatin.innerHTML = "<td>MATIN 9H00 - 12H00</td>";
+          rowSoir.innerHTML = "<td>APRES-MIDI 14H00 - 17H00</td>";
+
+          // Ajout dynamique des colonnes pour chaque date
+          Object.keys(emploiDuTemps).forEach(date => {
+            // Ajouter l'entête
+            const th = document.createElement("th");
+            th.textContent = new Date(date).toLocaleDateString("fr-FR");
+            headerRow.appendChild(th);
+
+            // Colonnes matin
+            const tdMatin = document.createElement("td");
+            if (emploiDuTemps[date].matin.length > 0) {
+              emploiDuTemps[date].matin.forEach(seance => {
+                tdMatin.innerHTML += `${seance.module.nom}<br>${seance.enseignant.nom}<br>`;
+              });
+            } else {
+              tdMatin.textContent = "Aucun cours";
+              tdMatin.classList.add("empty-course");
+            }
+            rowMatin.appendChild(tdMatin);
+
+            // Colonnes soir
+            const tdSoir = document.createElement("td");
+            if (emploiDuTemps[date].soir.length > 0) {
+              emploiDuTemps[date].soir.forEach(seance => {
+                tdSoir.innerHTML += `${seance.module.nom}<br>${seance.enseignant.nom}<br>`;
+              });
+            } else {
+              tdSoir.textContent = "Aucun cours";
+              tdSoir.classList.add("empty-course");
+            }
+            rowSoir.appendChild(tdSoir);
+          });
+
+        } else {
+          alert(response.data.message || "Impossible de charger l'emploi du temps");
+        }
+
+      } catch (error) {
+        console.error("Erreur API:", error);
+        alert("Erreur lors du chargement de l'emploi du temps");
+      }
+    });
+  </script>
 </body>
 
 </html>

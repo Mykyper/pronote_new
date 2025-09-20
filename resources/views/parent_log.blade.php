@@ -19,6 +19,7 @@
                 @csrf
                 <h1><img src="{{ asset('img/pere-et-fils.png') }}" alt="Login Icon" class="login-icon"> Espace Parents</h1>
                 
+                <!-- Zone pour afficher les erreurs -->
                 <div id="errors" class="alert alert-danger" style="display:none;"></div>
 
                 <label for="email">E-mail :</label>
@@ -38,12 +39,14 @@
 
         form.addEventListener('submit', async (e) => {
             e.preventDefault(); // Empêche le submit classique
+            errorsDiv.style.display = 'none';
+            errorsDiv.innerHTML = '';
 
             const email = document.getElementById('email').value;
             const password = document.getElementById('password').value;
 
             try {
-                const response = await fetch('/api/parent-login', {
+                const response = await fetch('{{ route("parent.login") }}', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -56,12 +59,9 @@
                 const data = await response.json();
 
                 if (response.ok && data.success) {
-                    // Connexion réussie
-                    alert(data.message);
-                    // Redirection vers dashboard parent
-                    window.location.href = '/parent/dashboard';
+                    // Redirection vers le dashboard parent
+                    window.location.href = '{{ route("parent.dashboard") }}';
                 } else {
-                    // Affiche les erreurs
                     errorsDiv.style.display = 'block';
                     errorsDiv.innerHTML = data.message || 'Identifiants incorrects';
                 }

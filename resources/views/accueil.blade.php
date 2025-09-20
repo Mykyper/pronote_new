@@ -23,7 +23,7 @@
             </a>
         </li>
         <li class="list-item">
-            <a href="/parent-log">
+            <a href="/parent-login-form">
                 <img src="{{ asset('img/pere-et-fils.png') }}" alt="">
                 <h2>Parent</h2>
             </a>

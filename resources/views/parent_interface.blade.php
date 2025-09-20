@@ -116,52 +116,99 @@
         <!-- Dropdown pour sélectionner l'enfant -->
         <div class="dropdown">
           <label for="enfant">Sélectionner un enfant :</label>
-          <select id="enfant" name="enfant" onchange="window.location.href=this.value;">
-            @foreach ($eleves as $enfant)
-              <option value="{{ route('parent.dashboard', ['enfant_id' => $enfant->id]) }}">{{ $enfant->nom }} {{ $enfant->prenom }}</option>
-            @endforeach
-          </select>
+         <select id="enfant" name="enfant">
+  @foreach ($eleves as $enfant)
+    <option value="{{ $enfant->id }}">{{ $enfant->nom }} {{ $enfant->prenom }}</option>
+  @endforeach
+</select>
+
         </div>
 
         <!-- Affichage de l'emploi du temps -->
-        <div class="timetable">
-          <table>
-            <thead>
-              <tr>
-                <th>Jour</th>
-                @foreach(array_keys($emploiDuTemps) as $date)
-                  <th>{{ \Carbon\Carbon::parse($date)->format('d/m/Y') }}</th>
-                @endforeach
-              </tr>
-            </thead>
-            <tbody>
-              <tr>
-                <td>MATIN 9H00 - 12H00</td>
-                @foreach($emploiDuTemps as $date => $sessions)
-                  <td class="sessions">
-                    @foreach($sessions['matin'] as $seance)
-                      {{ $seance->module->nom }}<br>
-                      {{ $seance->enseignant->nom }}<br>
-                    @endforeach
-                  </td>
-                @endforeach
-              </tr>
-              <tr>
-                <td>APRES-MIDI 14H00 - 17H00</td>
-                @foreach($emploiDuTemps as $date => $sessions)
-                  <td class="sessions">
-                    @foreach($sessions['soir'] as $seance)
-                      {{ $seance->module->nom }}<br>
-                      {{ $seance->enseignant->nom }}<br>
-                    @endforeach
-                  </td>
-                @endforeach
-              </tr>
-            </tbody>
-          </table>
-        </div>
+<div class="timetable">
+  <table id="emploi-table">
+    <thead>
+      <tr>
+        <th>Jour</th>
+        @foreach(array_keys($emploiDuTemps) as $date)
+          <th>{{ \Carbon\Carbon::parse($date)->format('d/m/Y') }}</th>
+        @endforeach
+      </tr>
+    </thead>
+    <tbody id="emploi-body">
+      <tr>
+        <td>MATIN 9H00 - 12H00</td>
+        @foreach($emploiDuTemps as $date => $sessions)
+          <td class="sessions">
+            @foreach($sessions['matin'] as $seance)
+              {{ $seance->module->nom }}<br>
+              {{ $seance->enseignant->nom }}<br>
+            @endforeach
+          </td>
+        @endforeach
+      </tr>
+      <tr>
+        <td>APRES-MIDI 14H00 - 17H00</td>
+        @foreach($emploiDuTemps as $date => $sessions)
+          <td class="sessions">
+            @foreach($sessions['soir'] as $seance)
+              {{ $seance->module->nom }}<br>
+              {{ $seance->enseignant->nom }}<br>
+            @endforeach
+          </td>
+        @endforeach
+      </tr>
+    </tbody>
+  </table>
+</div>
+
       </main>
     </div>
   </div>
 </body>
+<script>
+const selectEnfant = document.getElementById('enfant');
+const emploiBody = document.getElementById('emploi-body');
+
+selectEnfant.addEventListener('change', async () => {
+    const enfantId = selectEnfant.value;
+
+    try {
+        const response = await fetch(`/parent/emploi/${enfantId}`);
+        const data = await response.json();
+
+        if(data.success){
+            // Reconstruire le tbody du tableau
+            let html = '';
+
+            // Matin
+            html += '<tr><td>MATIN 9H00 - 12H00</td>';
+            data.emploiDuTemps.forEach(date => {
+                html += '<td class="sessions">';
+                date.matin.forEach(seance => {
+                    html += seance.module + '<br>' + seance.enseignant + '<br>';
+                });
+                html += '</td>';
+            });
+            html += '</tr>';
+
+            // Après-midi
+            html += '<tr><td>APRES-MIDI 14H00 - 17H00</td>';
+            data.emploiDuTemps.forEach(date => {
+                html += '<td class="sessions">';
+                date.soir.forEach(seance => {
+                    html += seance.module + '<br>' + seance.enseignant + '<br>';
+                });
+                html += '</td>';
+            });
+            html += '</tr>';
+
+            emploiBody.innerHTML = html;
+        }
+    } catch (err) {
+        console.error(err);
+    }
+});
+</script>
+
 </html>

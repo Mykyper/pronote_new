@@ -1,138 +1,231 @@
+/* =========================
+   Réinitialisation de base
+========================= */
 * {
     margin: 0;
     padding: 0;
     box-sizing: border-box;
-    font-family: Arial, sans-serif;
-  }
-  a{
+    font-family: 'Calibri', Arial, Helvetica, sans-serif;
+}
+
+a {
     text-decoration: none;
-    color: black;
-  }
-  body {
-    background-color: #f5f5f5;
-  }
+    color: inherit;
+}
+
+/* =========================
+   Body
+========================= */
+body {
   
-  .app {
+    color: #333;
+    line-height: 1.6;
+}
+
+/* =========================
+   Application container
+========================= */
+.app {
     display: flex;
     flex-direction: column;
     align-items: center;
     min-height: 100vh;
-  }
-  
-  .header {
-    background-color: blue;
-    color: white;
+}
+
+/* =========================
+   Header
+========================= */
+.header {
     width: 100%;
     padding: 20px;
+    background: linear-gradient(90deg, #1e3c72, #2a5298);
+    color: white;
     display: flex;
     justify-content: space-between;
     align-items: center;
-  }
-  
-  .title {
+    box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+}
+
+.title {
     font-size: 1.5em;
-  }
-  
-  .role {
+    font-weight: bold;
+}
+
+.role {
     font-size: 1.2em;
-  }
-  
-  .layout {
+    font-weight: bold;
+    margin-right: 15px;
+}
+
+/* =========================
+   Logout button
+========================= */
+.logout-button {
+    background-color: #dc3545;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 1em;
+    transition: background-color 0.3s ease, transform 0.3s ease;
+}
+
+.logout-button:hover {
+    background-color: #c82333;
+    transform: scale(1.05);
+}
+
+/* =========================
+   Layout
+========================= */
+.layout {
     display: flex;
     width: 100%;
     max-width: 1200px;
     margin-top: 20px;
-  }
-  
-  .sidebar {
+}
+
+/* =========================
+   Sidebar
+========================= */
+.sidebar {
     width: 250px;
-    background-color: #fff;
+    background-color: rgba(255, 255, 255, 0.95);
     padding: 20px;
     border-right: 1px solid #ddd;
-  }
-  
-  .sidebar ul {
-    list-style-type: none;
-  }
-  
-  .menu-item {
-    padding: 10px;
+    border-radius: 10px;
+    box-shadow: 0 6px 15px rgba(0,0,0,0.1);
+}
+
+.sidebar ul {
+    list-style: none;
+}
+
+.menu-item {
+    padding: 12px;
     font-size: 1.2em;
     display: flex;
     align-items: center;
     cursor: pointer;
-  }
-  
-  .menu-item .icon {
+    border-radius: 6px;
+    transition: all 0.3s ease;
+}
+
+.menu-item .icon {
     font-size: 1.5em;
     margin-right: 10px;
-  }
-  
-  .menu-item.active {
+}
+
+.menu-item:hover {
+    background: linear-gradient(135deg, #1e3c72, #2a5298, #4a90e2);
+    color: white;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+}
+
+.menu-item.active {
     background-color: #ff6b6b;
     color: white;
-  }
-  
-  .main-content {
+}
+
+/* =========================
+   Main content
+========================= */
+.main-content {
     flex-grow: 1;
     padding: 20px;
-  }
-  
-  .tabs {
+}
+
+.tabs {
     display: flex;
     gap: 10px;
     margin-bottom: 20px;
-  }
-  
-  .tab {
+}
+
+.tab {
     padding: 10px 20px;
     background-color: #ddd;
     border: none;
     cursor: pointer;
     font-size: 1em;
-  }
-  
-  .tab.active {
+    border-radius: 6px;
+    transition: all 0.3s ease;
+}
+
+.tab.active {
     background-color: #e74c3c;
     color: white;
-  }
-  
-  .timetable {
-    background-color: white;
+}
+
+/* =========================
+   Timetable
+========================= */
+.timetable {
+    background-color: rgba(255, 255, 255, 0.95);
     padding: 20px;
+    border-radius: 10px;
     border: 1px solid #ddd;
     text-align: center;
-  }
-  
-  table {
+    box-shadow: 0 6px 15px rgba(0,0,0,0.1);
+}
+
+table {
     width: 100%;
     border-collapse: collapse;
     margin-bottom: 20px;
-  }
-  
-  th, td {
+}
+
+th, td {
     border: 1px solid #ddd;
     padding: 15px;
     text-align: center;
-  }
-  
-  .note {
-    font-size: 1.1em;
-    color: red;
-    margin-top: 10px;
-  }
-  
-  .modify-button {
-    background-color: #ff6b6b;
+}
+
+th {
+    background: linear-gradient(90deg, #1e3c72, #2a5298);
+    color: white;
+}
+
+/* =========================
+   Modify button
+========================= */
+.modify-button {
+    background: linear-gradient(135deg, #ff6b6b, #e74c3c);
     color: white;
     border: none;
     padding: 15px 30px;
     font-size: 1.2em;
     cursor: pointer;
     margin-top: 20px;
-  }
-  
-  .modify-button:hover {
-    background-color: #e74c3c;
-  }
-  
+    border-radius: 6px;
+    transition: all 0.3s ease;
+}
+
+.modify-button:hover {
+    background: linear-gradient(135deg, #e74c3c, #c0392b);
+    transform: scale(1.05);
+}
+
+/* =========================
+   Responsive
+========================= */
+@media (max-width: 768px) {
+    .layout {
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .sidebar {
+        width: 90%;
+        margin-bottom: 20px;
+    }
+
+    .main-content {
+        width: 90%;
+    }
+
+    .header {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+}

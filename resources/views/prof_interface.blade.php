@@ -1,10 +1,10 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="fr">
 
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Pronote Ifran</title>
+  <title>Pronote Ifran - Enseignant</title>
   <link rel="stylesheet" href="{{ asset('css/interface.css') }}">
   <style>
     .header-right {
@@ -12,14 +12,12 @@
       align-items: center;
     }
 
-    /* Style pour le nom du professeur */
     .role {
       font-size: 16px;
       font-weight: bold;
       margin-right: 20px;
     }
 
-    /* Style pour le bouton de déconnexion */
     .logout-button {
       background-color: #dc3545;
       color: white;
@@ -34,23 +32,40 @@
     .logout-button:hover {
       background-color: #c82333;
     }
+
+    .modify-button {
+      margin: 20px;
+      padding: 10px 20px;
+      border-radius: 4px;
+      border: none;
+      background-color: #007bff;
+      color: white;
+      cursor: pointer;
+    }
+
+    .modify-button:hover {
+      background-color: #0069d9;
+    }
   </style>
 </head>
 
 <body>
   <div class="app">
+    <!-- Header -->
     <header class="header">
       <div class="title">Pronote Ifran</div>
       <div class="header-right">
         <div class="role">{{ $teacherName }}</div>
-        <form action="{{ route('logout') }}" method="POST">
+        <form action="{{ route('teacher.logout') }}" method="POST">
           @csrf
           <button type="submit" class="logout-button">Déconnexion</button>
         </form>
       </div>
     </header>
 
+    <!-- Layout -->
     <div class="layout">
+      <!-- Sidebar -->
       <aside class="sidebar">
         <ul>
           <li class="menu-item active">
@@ -65,6 +80,7 @@
         </ul>
       </aside>
 
+      <!-- Main content -->
       <main class="main-content">
         <div class="timetable">
           <h2>Emploi du temps</h2>
@@ -80,25 +96,29 @@
               @foreach($emploiDuTemps as $date => $sessions)
                 <tr>
                   <td>{{ $date }}</td>
+
+                  <!-- Matin -->
                   <td>
-                    @foreach($sessions as $session)
-                      @if($session->periode === 'matin')
+                    @if(isset($sessions['matin']))
+                      @foreach($sessions['matin'] as $session)
                         <a href="{{ url('presence/' . $session->id) }}">
-                          {{ $session->module->nom }}<br>
-                          {{ $session->classe->niveau }} {{ $session->classe->specialité }}<br>
+                          {{ $session->module->nom ?? 'Module inconnu' }}<br>
+                          {{ $session->classe->niveau ?? '' }} {{ $session->classe->specialité ?? '' }}<br>
                         </a>
-                      @endif
-                    @endforeach
+                      @endforeach
+                    @endif
                   </td>
+
+                  <!-- Après-midi -->
                   <td>
-                    @foreach($sessions as $session)
-                      @if($session->periode === 'soir')
+                    @if(isset($sessions['soir']))
+                      @foreach($sessions['soir'] as $session)
                         <a href="{{ url('presence/' . $session->id) }}">
-                          {{ $session->module->nom }}<br>
-                          {{ $session->classe->niveau }} {{ $session->classe->specialité }}<br>
+                          {{ $session->module->nom ?? 'Module inconnu' }}<br>
+                          {{ $session->classe->niveau ?? '' }} {{ $session->classe->specialité ?? '' }}<br>
                         </a>
-                      @endif
-                    @endforeach
+                      @endforeach
+                    @endif
                   </td>
                 </tr>
               @endforeach
@@ -107,7 +127,8 @@
         </div>
       </main>
     </div>
-    <button class="modify-button">Modifier</button>
+
+   
   </div>
 </body>
 
