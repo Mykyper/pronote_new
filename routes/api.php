@@ -32,7 +32,7 @@ Route::get('/users', [UserController::class, 'all']);
 # ================================
 Route::get('/student-login-form', [StudentAuthController::class, 'showLoginForm'])->name('student.login.form');
 Route::post('/student-login', [StudentAuthController::class, 'login'])->name('student.login');
-
+Route::get('/students', [StudentController::class, 'index']);
 // Vue pour l’interface après connexion
 Route::get('/student-interface', function () {
     return view('student-interface'); // ta vue Blade avec le tableau et JS

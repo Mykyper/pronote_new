@@ -18,30 +18,33 @@ class ParentAuthController extends Controller
     }
 
     // Connexion parent
-    public function login(Request $request): JsonResponse
-    {
-        $request->validate([
-            'email' => 'required|email',
-            'password' => 'required|string|min:6',
-        ]);
+   public function login(Request $request): JsonResponse
+{
+    $request->validate([
+        'email' => 'required|email',
+        'password' => 'required|string|min:6',
+    ]);
 
-        $parent = ParentModel::where('email', $request->email)->first();
+    $parent = ParentModel::where('email', $request->email)->first();
 
-        if ($parent && Hash::check($request->password, $parent->password)) {
-            // Stocker l'ID parent en session
-            $request->session()->put('parent_id', $parent->id);
-
-            return response()->json([
-                'success' => true,
-                'message' => 'Connexion réussie !',
-            ]);
-        }
-
+    if ($parent && Hash::check($request->password, $parent->password)) {
         return response()->json([
-            'success' => false,
-            'message' => 'Email ou mot de passe incorrect.',
-        ], 401);
+            'success' => true,
+            'message' => 'Connexion réussie !',
+            'parent' => [
+                'id' => $parent->id,
+                'nom' => $parent->nom,
+                'prenom' => $parent->prenom,
+                'email' => $parent->email,
+            ]
+        ]);
     }
+
+    return response()->json([
+        'success' => false,
+        'message' => 'Email ou mot de passe incorrect.',
+    ], 401);
+}
 
     // Dashboard parent
     public function showParentDashboard(Request $request)

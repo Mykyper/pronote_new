@@ -11,6 +11,16 @@ use Illuminate\Http\JsonResponse; // ✅ Laravel JsonResponse
 class StudentController extends Controller
 
   {
+    public function index(): JsonResponse
+{
+    $eleves = Eleve::with(['classe:id,niveau,specialité', 'parent:id,nom,prenom,email'])
+        ->get(['id', 'nom', 'prenom', 'email', 'classe_id', 'parent_id']);
+
+    return response()->json([
+        'success' => true,
+        'eleves' => $eleves
+    ]);
+}
     public function showForm()
 {
     $parents = ParentModel::all();

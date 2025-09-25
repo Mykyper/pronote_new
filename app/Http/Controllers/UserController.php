@@ -5,21 +5,21 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\User;
 use Illuminate\Support\Facades\Hash;
-
+use Illuminate\Http\JsonResponse;
 class UserController extends Controller
 {
     public function index(){
         return view("add_user");
     }
-    public function all()
-{
-    $users = User::all();
+   public function all(): JsonResponse
+    {
+        $users = User::all(['id', 'nom', 'prenom', 'email', 'role']);
 
-    return response()->json([
-        'success' => true,
-        'data' => $users
-    ], 200);
-}
+        return response()->json([
+            'success' => true,
+            'users' => $users
+        ]);
+    }
     public function store(Request $request)
     {
         $validated = $request->validate([
@@ -44,4 +44,5 @@ class UserController extends Controller
             'data' => $user,
         ], 201); // 201 = Created
     }
+    
 }

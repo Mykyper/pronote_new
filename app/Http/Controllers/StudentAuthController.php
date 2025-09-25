@@ -7,7 +7,7 @@ use App\Models\Eleve;
 use App\Models\Seance;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Http\JsonResponse;
-
+use Illuminate\Validation\ValidationException; 
 class StudentAuthController extends Controller
 {
     // Formulaire de connexion
@@ -17,34 +17,35 @@ class StudentAuthController extends Controller
     }
 
     // Login
-    public function login(Request $request): JsonResponse
-    {
-        $credentials = $request->only('email', 'password');
+ public function login(Request $request): JsonResponse
+{
+    $credentials = $request->validate([
+        'email' => 'required|email',
+        'password' => 'required|string|min:6',
+    ]);
 
-        $eleve = Eleve::where('email', $credentials['email'])->first();
+    $eleve = Eleve::where('email', $credentials['email'])->first();
 
-        if ($eleve && Hash::check($credentials['password'], $eleve->password)) {
-            // Stocker l'id élève dans la session
-            $request->session()->put('student_id', $eleve->id);
-
-            return response()->json([
-                'success' => true,
-                'message' => 'Connexion réussie',
-                'redirect' => route('student-inter'),
-                'student' => [
-                    'id' => $eleve->id,
-                    'nom' => $eleve->nom,
-                    'prenom' => $eleve->prenom,
-                    'classe_id' => $eleve->classe_id
-                ]
-            ], 200);
-        }
-
+    if ($eleve && Hash::check($credentials['password'], $eleve->password)) {
         return response()->json([
-            'success' => false,
-            'message' => 'Identifiants incorrects'
-        ], 401);
+            'success' => true,
+            'message' => 'Connexion réussie',
+            'redirect' => route('student-inter'),
+            'student' => [
+                'id' => $eleve->id,
+                'nom' => $eleve->nom,
+                'prenom' => $eleve->prenom,
+                'classe_id' => $eleve->classe_id
+            ]
+        ], 200);
     }
+
+    return response()->json([
+        'success' => false,
+        'message' => 'Identifiants incorrects'
+    ], 401);
+}
+
 
     // Interface élève
     public function interface(Request $request)
