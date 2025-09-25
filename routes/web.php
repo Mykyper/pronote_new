@@ -92,7 +92,7 @@ Route::get('/students/create', [StudentController::class, 'showForm'])->name('st
 Route::get('/parents/create', [ParentController::class, 'create'])->name('parents.create');
 Route::get('/users/create', [UserController::class, 'index'])->name('users.create');
 Route::get('/modules/create', [ModuleController::class, 'create'])->name('modules.create');
-Route::get('/emplois-du-temps/create', [SeanceController::class, 'create'])->name('schedule.create');
+Route::get('/schedule/create', [SeanceController::class, 'create'])->name('schedule.create');
 
 /*
 |--------------------------------------------------------------------------

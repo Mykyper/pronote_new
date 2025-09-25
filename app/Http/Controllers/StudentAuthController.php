@@ -85,12 +85,14 @@ class StudentAuthController extends Controller
             ->take(10)
             ->toArray();
 
-        $seances = Seance::where('class_id', $classId)
-            ->whereIn('date', $recentDates)
-            ->orderBy('date', 'asc')
-            ->orderBy('periode', 'asc')
-            ->get()
-            ->groupBy('date');
+       $seances = Seance::where('class_id', $classId)
+    ->whereIn('date', $recentDates)
+    ->with(['module', 'enseignant']) // <-- très important
+    ->orderBy('date', 'asc')
+    ->orderBy('periode', 'asc')
+    ->get()
+    ->groupBy('date');
+
 
         $emploiDuTemps = [];
         foreach ($seances as $date => $listeSeances) {

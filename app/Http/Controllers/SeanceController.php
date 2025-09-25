@@ -10,22 +10,23 @@ use App\Models\Seance;
 
 class SeanceController extends Controller
 {
-    public function create()
+   public function create()
     {
-        if (!session()->has('coordinator_id')) {
-            return redirect('/coordinator-login')->with('error', 'Vous devez être connecté pour enregistrer les présences.');
-        }
         $classes = Classe::all();
         $modules = Module::all();
-        $enseignants = User::where('role', 'enseignant')->get();
-        
-        return view('emploi', compact('classes', 'modules', 'enseignants'));
+
+        // Si tes enseignants sont dans users avec role = 'enseignant'
+        $teachers = User::where('role', 'enseignant')->get();
+
+        // ou si tu as un model "Enseignant"
+        // $teachers = Enseignant::all();
+
+        return view('emploi', compact('classes', 'modules', 'teachers'));
     }
 
-    public function store(Request $request)
-    {if (!session()->has('coordinator_id')) {
-        return redirect('/coordinator-login')->with('error', 'Vous devez être connecté pour enregistrer les présences.');
-    }
+   public function store(Request $request)
+{
+    try {
         $request->validate([
             'class_id' => 'required|exists:classes,id',
             'schedule' => 'required|array',
@@ -36,11 +37,7 @@ class SeanceController extends Controller
             'schedule.*.evening_teacher_id' => 'nullable|exists:users,id',
         ]);
 
-        
-       
-
         foreach ($request->input('schedule') as $daySchedule) {
-            // Create morning session
             if ($daySchedule['morning_module_id'] && $daySchedule['morning_teacher_id']) {
                 Seance::create([
                     'class_id' => $request->input('class_id'),
@@ -50,8 +47,6 @@ class SeanceController extends Controller
                     'enseignant_id' => $daySchedule['morning_teacher_id'],
                 ]);
             }
-
-            // Create evening session
             if ($daySchedule['evening_module_id'] && $daySchedule['evening_teacher_id']) {
                 Seance::create([
                     'class_id' => $request->input('class_id'),
@@ -63,6 +58,17 @@ class SeanceController extends Controller
             }
         }
 
-        return redirect()->route('schedule.create')->with('success', 'Emploi du temps enregistré avec succès.');
+        return response()->json([
+            'success' => true,
+            'message' => 'Emploi du temps enregistré avec succès.'
+        ]);
+    } catch (\Exception $e) {
+        return response()->json([
+            'success' => false,
+            'message' => $e->getMessage()
+        ], 500);
     }
+}
+
+
 }

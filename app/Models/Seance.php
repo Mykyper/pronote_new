@@ -18,7 +18,7 @@ class Seance extends Model
         return $this->belongsTo(Classe::class, 'class_id');
     }
 
-    public function enseignant()
+     public function enseignant()
     {
         return $this->belongsTo(User::class, 'enseignant_id');
     }

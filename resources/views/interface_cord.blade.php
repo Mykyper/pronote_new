@@ -32,7 +32,7 @@
             </a>
           </li>
           <li class="menu-item">
-            <a href="/emplois-du-temps/create">Créer emploi du temps</a> 
+            <a href="/schedule/create">Créer emploi du temps</a> 
           </li>
           <li class="menu-item">
             <a href="/modules/create">Créer Module</a> 

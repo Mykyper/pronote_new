@@ -77,8 +77,12 @@ Route::get('/modules', [ModuleController::class, 'index']);
 # ================================
 # Emplois du temps (séances)
 # ================================
-Route::post('/emplois-du-temps', [SeanceController::class, 'store']);
+// Route::post('/emplois-du-temps', [SeanceController::class, 'store']);
 Route::get('/emplois-du-temps', [SeanceController::class, 'index']);
+// Dans api.php
+Route::post('/schedule/store', [SeanceController::class, 'store'])->name('api.schedule.store');
+
+
 
 # ================================
 # Présence

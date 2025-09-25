@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="fr">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -35,6 +35,19 @@
         border-radius: 4px;
         border: 1px solid #ccc;
     }
+    button {
+        margin-top: 15px;
+        padding: 10px 20px;
+        font-size: 16px;
+        border: none;
+        border-radius: 4px;
+        background-color: #28a745;
+        color: white;
+        cursor: pointer;
+    }
+    button:hover {
+        background-color: #218838;
+    }
 </style>
 </head>
 <body>
@@ -54,7 +67,7 @@
 
     <main class="main-content">
         <h1>Créer l'Emploi du Temps</h1>
-        <form action="{{ route('schedule.store') }}" method="POST" id="schedule-form">
+        <form id="schedule-form">
             @csrf
             <div class="form-section">
                 <label for="class">Classe :</label>
@@ -78,35 +91,39 @@
                         </tr>
                     </thead>
                     <tbody>
-                        @foreach(['Lundi','Mardi','Mercredi','Jeudi','Vendredi'] as $day)
+                        @foreach(['lundi','mardi','mercredi','jeudi','vendredi'] as $day)
                         <tr>
-                            <td>{{ $day }}</td>
-                            <td><input type="date" name="schedule[{{ strtolower($day) }}][day]" required></td>
+                            <td>{{ ucfirst($day) }}</td>
+                            <td><input type="date" name="schedule[{{ $day }}][day]" required></td>
                             <td>
-                                <select name="schedule[{{ strtolower($day) }}][morning_module_id]">
+                                <select name="schedule[{{ $day }}][morning_module_id]">
+                                  
                                     @foreach ($modules as $module)
                                         <option value="{{ $module->id }}">{{ $module->nom }}</option>
                                     @endforeach
                                 </select>
                             </td>
                             <td>
-                                <select name="schedule[{{ strtolower($day) }}][morning_teacher_id]">
-                                    @foreach ($enseignants as $e)
-                                        <option value="{{ $e->id }}">{{ $e->nom }} {{ $e->prenom }}</option>
+                                <select name="schedule[{{ $day }}][morning_teacher_id]">
+                                   
+                                    @foreach ($teachers as $teacher)
+                                        <option value="{{ $teacher->id }}">{{ $teacher->nom }} {{ $teacher->prenom }}</option>
                                     @endforeach
                                 </select>
                             </td>
                             <td>
-                                <select name="schedule[{{ strtolower($day) }}][evening_module_id]">
+                                <select name="schedule[{{ $day }}][evening_module_id]">
+                                  
                                     @foreach ($modules as $module)
                                         <option value="{{ $module->id }}">{{ $module->nom }}</option>
                                     @endforeach
                                 </select>
                             </td>
                             <td>
-                                <select name="schedule[{{ strtolower($day) }}][evening_teacher_id]">
-                                    @foreach ($enseignants as $e)
-                                        <option value="{{ $e->id }}">{{ $e->nom }} {{ $e->prenom }}</option>
+                                <select name="schedule[{{ $day }}][evening_teacher_id]">
+                                    
+                                    @foreach ($teachers as $teacher)
+                                        <option value="{{ $teacher->id }}">{{ $teacher->nom }} {{ $teacher->prenom }}</option>
                                     @endforeach
                                 </select>
                             </td>
@@ -120,5 +137,41 @@
         </form>
     </main>
 </div>
+
+<script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+<script>
+document.getElementById("schedule-form").addEventListener("submit", async (e) => {
+    e.preventDefault();
+
+    const formData = new FormData(e.target);
+    const classId = formData.get("class_id");
+
+    const schedule = ['lundi','mardi','mercredi','jeudi','vendredi'].map(day => ({
+        day: formData.get(`schedule[${day}][day]`),
+        morning_module_id: formData.get(`schedule[${day}][morning_module_id]`) || null,
+        morning_teacher_id: formData.get(`schedule[${day}][morning_teacher_id]`) || null,
+        evening_module_id: formData.get(`schedule[${day}][evening_module_id]`) || null,
+        evening_teacher_id: formData.get(`schedule[${day}][evening_teacher_id]`) || null,
+    }));
+
+    try {
+        const response = await axios.post("{{ route('api.schedule.store') }}", {
+            class_id: classId,
+            schedule: schedule
+        });
+
+        if (response.data.success) {
+            alert("✅ Emploi du temps enregistré avec succès !");
+            // Optionnel : reset du formulaire
+            e.target.reset();
+        } else {
+            alert("❌ " + (response.data.message || "Erreur lors de l'enregistrement"));
+        }
+    } catch (err) {
+        console.error(err);
+        alert("❌ Erreur API !");
+    }
+});
+</script>
 </body>
 </html>
