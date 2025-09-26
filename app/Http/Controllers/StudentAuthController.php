@@ -19,6 +19,7 @@ class StudentAuthController extends Controller
     // Login
  public function login(Request $request): JsonResponse
 {
+    // Validation
     $credentials = $request->validate([
         'email' => 'required|email',
         'password' => 'required|string|min:6',
@@ -27,11 +28,15 @@ class StudentAuthController extends Controller
     $eleve = Eleve::where('email', $credentials['email'])->first();
 
     if ($eleve && Hash::check($credentials['password'], $eleve->password)) {
+        // Si tu veux stocker la session pour navigateur web, décommenter :
+        // session(['student_id' => $eleve->id])
+
         return response()->json([
             'success' => true,
             'message' => 'Connexion réussie',
             'redirect' => route('student-inter'),
             'student' => [
+                
                 'id' => $eleve->id,
                 'nom' => $eleve->nom,
                 'prenom' => $eleve->prenom,
@@ -47,16 +52,20 @@ class StudentAuthController extends Controller
 }
 
 
-    // Interface élève
-    public function interface(Request $request)
-    {
-        // Vérifier que l'élève est connecté
-        if (!$request->session()->has('student_id')) {
-            return redirect()->route('student.login.form');
-        }
 
-        return view('eleve_interface');
+    // Interface élève
+   public function interface(Request $request)
+{
+    // Vérifier que l'élève est connecté via session
+    if (!$request->session()->has('student_id')) {
+        return redirect()->route('student.login.form');
     }
+
+    $studentId = $request->session()->get('student_id');
+    $eleve = Eleve::find($studentId);
+
+    return view('eleve_interface', compact('eleve'));
+}
 
     // Récupérer l'emploi du temps (API)
     public function showEmploi(Request $request): JsonResponse
