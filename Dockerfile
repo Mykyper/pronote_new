@@ -1,36 +1,32 @@
-# Utiliser une image officielle PHP avec Apache
-FROM php:8.2-apache
+# Étape 1 : Image PHP avec extensions nécessaires
+FROM php:8.2-fpm
 
-# Activer mod_rewrite pour Laravel
-RUN a2enmod rewrite
+# Installer dépendances système et extensions PHP
+RUN apt-get update && apt-get install -y \
+    git unzip libzip-dev zip libpng-dev libonig-dev \
+    && docker-php-ext-install pdo_mysql mbstring zip exif pcntl bcmath
+
+# Installer Composer
+COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
 # Définir le répertoire de travail
 WORKDIR /var/www/html
 
-# Copier le projet dans le conteneur
-COPY . .
+# Copier uniquement composer.json et composer.lock pour optimiser le cache Docker
+COPY composer.json composer.lock ./
 
-# Installer Composer
-RUN apt-get update && apt-get install -y unzip git \
-    && curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
-
-# Installer les dépendances
+# Installer les dépendances PHP
 RUN composer install --no-dev --optimize-autoloader
 
-# Définir les permissions nécessaires
-RUN chmod -R 775 storage bootstrap/cache
+# Copier le reste du projet
+COPY . .
 
-# Configurer Apache pour pointer vers le dossier public
-RUN echo "<VirtualHost *:80>\n\
-    DocumentRoot /var/www/html/public\n\
-    <Directory /var/www/html/public>\n\
-        AllowOverride All\n\
-        Require all granted\n\
-    </Directory>\n\
-</VirtualHost>" > /etc/apache2/sites-available/000-default.conf
+# Permissions
+RUN chown -R www-data:www-data storage bootstrap/cache \
+    && chmod -R 775 storage bootstrap/cache
 
-# Exposer le port 80
-EXPOSE 80
+# Exposer le port que Render utilisera
+EXPOSE 10000
 
-# Lancer Apache
-CMD ["apache2-foreground"]
+# Commande pour démarrer Laravel avec PHP-FPM
+CMD ["php-fpm"]
