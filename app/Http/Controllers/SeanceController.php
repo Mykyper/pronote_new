@@ -7,6 +7,8 @@ use App\Models\Classe;
 use App\Models\Module;
 use App\Models\User; // Assumant que les enseignants sont des utilisateurs
 use App\Models\Seance;
+use Illuminate\Http\JsonResponse;
+use App\Models\Eleve;
 
 class SeanceController extends Controller
 {
@@ -68,6 +70,54 @@ class SeanceController extends Controller
             'message' => $e->getMessage()
         ], 500);
     }
+}
+public function index(): JsonResponse
+{
+    try {
+        // 🔍 Récupère toutes les séances avec leurs relations
+        $seances = Seance::with(['module', 'enseignant', 'classe'])
+            ->orderBy('date', 'desc')
+            ->orderBy('periode', 'asc')
+            ->get();
+
+        // ✅ Réponse JSON
+        return response()->json([
+            'success' => true,
+            'count' => $seances->count(),
+            'seances' => $seances
+        ]);
+    } catch (\Exception $e) {
+        // ⚠️ Gestion d’erreur
+        return response()->json([
+            'success' => false,
+            'message' => $e->getMessage()
+        ], 500);
+    }
+}
+public function getSeancesByEleve($eleveId): JsonResponse
+{
+    // 🔹 Récupérer l'élève
+    $eleve = Eleve::find($eleveId);
+
+    if (!$eleve) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Élève introuvable'
+        ], 404);
+    }
+
+    // 🔹 Filtrer les séances selon la classe de l'élève
+    $seances = Seance::with(['module', 'enseignant', 'classe'])
+        ->where('classe_id', $eleve->classe_id)
+        ->orderBy('date', 'desc')
+        ->orderBy('periode', 'asc')
+        ->get();
+
+    return response()->json([
+        'success' => true,
+        'count' => $seances->count(),
+        'seances' => $seances
+    ]);
 }
 
 

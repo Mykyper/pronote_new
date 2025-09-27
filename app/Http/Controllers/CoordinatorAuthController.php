@@ -4,7 +4,8 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\User;
-
+use Illuminate\Http\JsonResponse; 
+use Illuminate\Support\Facades\Hash;
 class CoordinatorAuthController extends Controller
 {
     // Afficher le formulaire de connexion des coordinateurs
@@ -14,22 +15,36 @@ class CoordinatorAuthController extends Controller
     }
 
     // Traiter la connexion des coordinateurs
-    public function login(Request $request)
-    {
-        $credentials = $request->only('email', 'password');
+   public function login(Request $request)
+{
+    $request->validate([
+        'email' => 'required|email',
+        'password' => 'required|string|min:6',
+    ]);
 
-        // Vérifiez les identifiants
-        $user = User::where('email', $credentials['email'])->where('role', 'coordinateur')->first();
+    $user = User::where('email', $request->email)
+                ->where('role', 'coordinateur')
+                ->first();
 
-        if ($user && password_verify($credentials['password'], $user->password)) {
-            // Authentifier l'utilisateur et stocker son ID dans la session
-            $request->session()->put('coordinator_id', $user->id);
+    if ($user && Hash::check($request->password, $user->password)) {
+        session(['coordinator_id' => $user->id]);
 
-            // Rediriger vers une page protégée ou dashboard
-            return redirect()->route('coord-inter')->with('success', 'Connexion réussie !');
-        }
-
-        // Si les informations d'identification sont incorrectes
-        return redirect()->back()->withErrors(['email' => 'Identifiants incorrects.']);
+        return response()->json([
+            'success' => true,
+            'message' => 'Connexion réussie !',
+            'redirect' => route('coord-inter'),
+             'user' => [
+                'id' => $user->id,
+                'nom' => $user->nom,
+                'prenom' => $user->prenom,
+                'email' => $user->email,
+            ]
+        ]);
     }
+
+    return response()->json([
+        'success' => false,
+        'message' => 'Email ou mot de passe incorrect.'
+    ], 401);
+}
 }

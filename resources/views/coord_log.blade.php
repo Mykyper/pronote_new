@@ -15,24 +15,61 @@
     </header>
     <main>
         <div class="log">
-            <form class="login-form" action="{{ route('coordinator.login') }}" method="POST" id="coordinator-login-form">
-                @csrf
-                <h1><img src="{{ asset('img/chapeau-de-fin-detudes.png') }}" alt="Login Icon" class="login-icon"> Espace Coordinateur</h1>
-                @if ($errors->any())
-                    <div class="alert alert-danger">
-                        <ul>
-                            @foreach ($errors->all() as $error)
-                                <li>{{ $error }}</li>
-                            @endforeach
-                        </ul>
-                    </div>
-                @endif
-                <label for="email">E-mail :</label>
-                <input type="email" id="email" name="email" required>
-                <label for="password">Mot de passe :</label>
-                <input type="password" id="password" name="password" required>
-                <button type="submit">Se connecter</button>
-            </form>
+           <form class="login-form" id="coordinator-login-form">
+    @csrf
+    <h1>
+        <img src="{{ asset('img/chapeau-de-fin-detudes.png') }}" alt="Login Icon" class="login-icon">
+        Espace Coordinateur
+    </h1>
+
+    <div id="errors" class="alert alert-danger" style="display:none;"></div>
+
+    <label for="email">E-mail :</label>
+    <input type="email" id="email" name="email" required>
+
+    <label for="password">Mot de passe :</label>
+    <input type="password" id="password" name="password" required>
+
+    <button type="submit">Se connecter</button>
+</form>
+
+<script>
+const form = document.getElementById('coordinator-login-form');
+const errorsDiv = document.getElementById('errors');
+
+form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+
+    const email = document.getElementById('email').value;
+    const password = document.getElementById('password').value;
+    const token = document.querySelector('input[name="_token"]').value;
+
+    try {
+        const response = await fetch('/api/coordinator-login', { // <-- API route
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json',
+                'X-CSRF-TOKEN': token
+            },
+            body: JSON.stringify({ email, password })
+        });
+
+        const data = await response.json();
+
+        if (data.success) {
+            window.location.href = data.redirect;
+        } else {
+            errorsDiv.style.display = 'block';
+            errorsDiv.innerText = data.message || 'Erreur inconnue';
+        }
+    } catch (err) {
+        errorsDiv.style.display = 'block';
+        errorsDiv.innerText = 'Erreur serveur';
+        console.error(err);
+    }
+});
+</script>
         </div>
     </main>
 </body>

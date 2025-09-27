@@ -99,27 +99,27 @@
 
                   <!-- Matin -->
                   <td>
-                    @if(isset($sessions['matin']))
-                      @foreach($sessions['matin'] as $session)
-                        <a href="{{ url('presence/' . $session->id) }}">
-                          {{ $session->module->nom ?? 'Module inconnu' }}<br>
-                          {{ $session->classe->niveau ?? '' }} {{ $session->classe->specialité ?? '' }}<br>
-                        </a>
-                      @endforeach
-                    @endif
-                  </td>
+  @if(isset($sessions['matin']))
+    @foreach($sessions['matin'] as $session)
+      <a href="{{ route('presence.show', ['sessionId' => $session->id]) }}">
+        {{ $session->module->nom ?? 'Module inconnu' }}<br>
+        {{ $session->classe->niveau ?? '' }} {{ $session->classe->specialité ?? '' }}<br>
+      </a>
+    @endforeach
+  @endif
+</td>
 
                   <!-- Après-midi -->
                   <td>
-                    @if(isset($sessions['soir']))
-                      @foreach($sessions['soir'] as $session)
-                        <a href="{{ url('presence/' . $session->id) }}">
-                          {{ $session->module->nom ?? 'Module inconnu' }}<br>
-                          {{ $session->classe->niveau ?? '' }} {{ $session->classe->specialité ?? '' }}<br>
-                        </a>
-                      @endforeach
-                    @endif
-                  </td>
+  @if(isset($sessions['soir']))
+    @foreach($sessions['soir'] as $session)
+      <a href="{{ route('presence.show', ['sessionId' => $session->id]) }}">
+        {{ $session->module->nom ?? 'Module inconnu' }}<br>
+        {{ $session->classe->niveau ?? '' }} {{ $session->classe->specialité ?? '' }}<br>
+      </a>
+    @endforeach
+  @endif
+</td>
                 </tr>
               @endforeach
             </tbody>

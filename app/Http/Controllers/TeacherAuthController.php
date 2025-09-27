@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use App\Models\User;
 use App\Models\Seance;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Http\JsonResponse; 
 
 class TeacherAuthController extends Controller
 {
@@ -16,7 +17,7 @@ class TeacherAuthController extends Controller
     }
 
     // Traiter la connexion des enseignants
-  public function login(Request $request)
+ public function login(Request $request): JsonResponse
 {
     $request->validate([
         'email' => 'required|email',
@@ -28,18 +29,18 @@ class TeacherAuthController extends Controller
         ->first();
 
     if ($teacher && Hash::check($request->password, $teacher->password)) {
-        // Stocker l'ID de l'enseignant dans la session
-        $request->session()->put('teacher_id', $teacher->id);
+        session(['teacher_id' => $teacher->id]);
 
         return response()->json([
             'success' => true,
             'message' => 'Connexion réussie !',
+            'redirect' => route('teacher.dashboard'),
             'teacher' => [
                 'id' => $teacher->id,
                 'nom' => $teacher->nom,
                 'prenom' => $teacher->prenom,
                 'email' => $teacher->email,
-            ],
+            ]
         ], 200);
     }
 
@@ -50,11 +51,12 @@ class TeacherAuthController extends Controller
 }
 
 
+
     // Déconnexion de l'enseignant
     public function logout(Request $request)
     {
         $request->session()->forget('teacher_id');
-        return redirect('/teacher/login');
+        return redirect('/');
     }
 
     // Afficher le dashboard enseignant

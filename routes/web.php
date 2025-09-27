@@ -27,8 +27,6 @@ Route::get('/', fn() => view('accueil'));
 Route::get('/student-log', fn() => view('eleve_log'));
 Route::get('/master-log', fn() => view('master_log'));
 Route::get('/coordinator-log', fn() => view('coord_log'));
-Route::get('/teacher-interface', [TeacherAuthController::class, 'showTeacherDashboard'])
-    ->name('teacher.interface');
 Route::get('/admin', fn() => view('admin'))->name('admin');
 
 /*
@@ -38,8 +36,12 @@ Route::get('/admin', fn() => view('admin'))->name('admin');
 */
 Route::get('/student-login-form', [StudentAuthController::class, 'showLoginForm'])->name('student.login.form');
 Route::post('/student-login', [StudentAuthController::class, 'login'])->name('student.login');
-Route::get('/student-interface', [StudentAuthController::class, 'interface'])->name('student-inter')->middleware('web');
-Route::get('/student/emploi', [StudentAuthController::class, 'showEmploi'])->name('student.api.emploi')->middleware('web');
+Route::get('/student-interface', [StudentAuthController::class, 'interface'])
+    ->name('student-inter')
+    ->middleware('web');
+Route::get('/student/emploi', [StudentAuthController::class, 'showEmploi'])
+    ->name('student.api.emploi')
+    ->middleware('web');
 
 /*
 |--------------------------------------------------------------------------
@@ -47,16 +49,16 @@ Route::get('/student/emploi', [StudentAuthController::class, 'showEmploi'])->nam
 |--------------------------------------------------------------------------
 */
 Route::get('/teacher/login', [TeacherAuthController::class, 'showLoginForm'])->name('teacher-login');
-Route::post('/teacher/login', [TeacherAuthController::class, 'login'])->name('teacher-login.post');
 // Login via API (AJAX)
-Route::post('/api/teacher-login', [TeacherAuthController::class, 'login'])->name('teacher.login');
-
+Route::post('/teacher-login', [TeacherAuthController::class, 'login'])->name('teacher.login');
 Route::get('/teacher/dashboard', [TeacherAuthController::class, 'showTeacherDashboard'])
     ->name('teacher.dashboard')
     ->middleware('web');
-    // API pour récupérer l'emploi du temps d'un enseignant (AJAX)
+
+// API pour récupérer l'emploi du temps d'un enseignant (AJAX)
 Route::get('/teacher/emploi/{teacherId}', [TeacherAuthController::class, 'getEmploiDuTemps']);
-// Déconnexion
+
+// Déconnexion enseignant
 Route::post('/teacher/logout', [TeacherAuthController::class, 'logout'])->name('teacher.logout');
 
 /*
@@ -64,7 +66,8 @@ Route::post('/teacher/logout', [TeacherAuthController::class, 'logout'])->name('
 | Authentification Coordinateurs
 |--------------------------------------------------------------------------
 */
-Route::get('/coordinator-login', [CoordinatorAuthController::class, 'showLoginForm'])->name('coordinator.login.form');
+Route::get('/coordinator-login', [CoordinatorAuthController::class, 'showLoginForm'])
+    ->name('coordinator.login.form');
 Route::post('/coordinator-login', [CoordinatorAuthController::class, 'login'])->name('coordinator.login');
 Route::get('/coordinator-interface/{classId?}', [CoordinateurController::class, 'showInterface'])->name('coord-inter');
 Route::get('/coordinateur/timetable/{classId}', [CoordinateurController::class, 'showTimetable'])->name('coordinateur.timetable.show');
@@ -74,13 +77,13 @@ Route::get('/coordinateur/timetable/{classId}', [CoordinateurController::class, 
 | Authentification Parents
 |--------------------------------------------------------------------------
 */
-// Formulaire et login
 Route::get('/parent-login-form', [ParentAuthController::class, 'showLoginForm'])->name('parent.login.form');
 Route::post('/parent-login', [ParentAuthController::class, 'login'])->name('parent.login');
 Route::post('/parent/logout', [ParentAuthController::class, 'logout'])->name('parent.logout');
 
-// Dashboard et AJAX pour emploi du temps
-Route::get('/parent/dashboard', [ParentAuthController::class, 'showParentDashboard'])->name('parent.dashboard')->middleware('web');
+Route::get('/parent/dashboard', [ParentAuthController::class, 'showParentDashboard'])
+    ->name('parent.dashboard')
+    ->middleware('web');
 Route::get('/parent/emploi/{enfantId}', [ParentAuthController::class, 'getEmploiDuTemps']);
 
 /*
@@ -135,7 +138,7 @@ Route::get('/taux-par-module', [GraphController::class, 'tauxParModule'])->name(
 
 /*
 |--------------------------------------------------------------------------
-| Logout coordinateur
+| Logout Coordinateur
 |--------------------------------------------------------------------------
 */
 Route::post('/logout-cord', function () {

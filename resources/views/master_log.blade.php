@@ -16,13 +16,19 @@
     <main>
         <div class="log">
             <form class="login-form" id="teacher-login-form">
-                <h1><img src="{{ asset('img/livre.png') }}" alt="Login Icon" class="login-icon"> Espace Enseignant</h1>
+                @csrf
+                <h1>
+                    <img src="{{ asset('img/livre.png') }}" alt="Login Icon" class="login-icon">
+                    Espace Enseignant
+                </h1>
                 <div id="errors" class="alert alert-danger" style="display:none;"></div>
 
                 <label for="email">E-mail :</label>
                 <input type="email" id="email" name="email" required>
+
                 <label for="password">Mot de passe :</label>
                 <input type="password" id="password" name="password" required>
+
                 <button type="submit">Se connecter</button>
             </form>
         </div>
@@ -37,34 +43,32 @@
 
             const email = document.getElementById('email').value;
             const password = document.getElementById('password').value;
+            const token = document.querySelector('input[name="_token"]').value;
 
             try {
-                const response = await fetch('/api/teacher-login', {
+                const response = await fetch('/teacher-login', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
                         'Accept': 'application/json',
-                        'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                        'X-CSRF-TOKEN': token
                     },
                     body: JSON.stringify({ email, password })
                 });
 
                 const data = await response.json();
 
-                if (response.ok && data.success) {
-                    // Connexion réussie
-                    alert(data.message);
-                    // Redirection possible vers une page front ou SPA
-                    window.location.href = '/teacher-interface';
+                if (data.success) {
+                    // Redirection vers le dashboard dynamique
+                    window.location.href = data.redirect;
                 } else {
-                    // Affiche les erreurs
                     errorsDiv.style.display = 'block';
-                    errorsDiv.innerHTML = data.message || 'Erreur inconnue';
+                    errorsDiv.innerText = data.message || 'Erreur inconnue';
                 }
-            } catch (error) {
+            } catch (err) {
                 errorsDiv.style.display = 'block';
-                errorsDiv.innerHTML = 'Erreur de connexion au serveur';
-                console.error(error);
+                errorsDiv.innerText = 'Erreur serveur';
+                console.error(err);
             }
         });
     </script>

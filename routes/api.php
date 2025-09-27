@@ -1,98 +1,64 @@
 <?php
 
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\UserController;
-use App\Http\Controllers\ParentController;
-use App\Http\Controllers\StudentController;
-use App\Http\Controllers\ClasseController;
-use App\Http\Controllers\ModuleController;
-use App\Http\Controllers\SeanceController;
-use App\Http\Controllers\PresenceController;
-use App\Http\Controllers\GraphController;
-use App\Http\Controllers\StudentAuthController;
-use App\Http\Controllers\TeacherAuthController;
-use App\Http\Controllers\CoordinatorAuthController;
-use App\Http\Controllers\ParentAuthController;
+use App\Http\Controllers\{
+    ParentAuthController,
+    StudentAuthController,
+    TeacherAuthController,
+    CoordinatorAuthController,
+    SeanceController,
+    ParentController,
+    StudentController,
+    UserController,
+    ModuleController,
+    ClasseController,
+    PresenceController,
+    GraphController
+};
 
 /*
 |--------------------------------------------------------------------------
-| API Routes
+| API Utilisateurs et Authentification
 |--------------------------------------------------------------------------
 */
-
-# ================================
-# Utilisateurs
-# ================================
-Route::post('/users', [UserController::class, 'store']);
-Route::get('/users', [UserController::class, 'all']);
-
-# ================================
-# Étudiants
-# ================================
-Route::get('/student-login-form', [StudentAuthController::class, 'showLoginForm'])->name('student.login.form');
-Route::post('/student-login', [StudentAuthController::class, 'login'])->name('student.login');
+// Étudiants
+Route::post('/student-login', [StudentAuthController::class, 'login']);
+Route::get('/student/schedule', [StudentAuthController::class, 'showEmploi']);
 Route::get('/students', [StudentController::class, 'index']);
-// Vue pour l’interface après connexion
-Route::get('/student-interface', function () {
-    return view('student-interface'); // ta vue Blade avec le tableau et JS
-})->name('student-inter')->middleware('web');
 
-// API pour récupérer l’emploi du temps
-Route::get('/student/emploi', [StudentAuthController::class, 'show'])
-    ->name('student.api.emploi')
-    ->middleware('web');
-
-
-# ================================
-# Enseignants
-# ================================
-Route::post('/teacher-login', [TeacherAuthController::class, 'apiLogin']);
-Route::get('/teacher-interface', [TeacherAuthController::class, 'apiShow']);
-
-# ================================
-# Coordinateurs
-# ================================
-Route::post('/coordinator-login', [CoordinatorAuthController::class, 'login']);
-
-# ================================
-# Parents
-# ================================
-Route::post('/parents', [ParentController::class, 'store']);
-Route::get('/parents', [ParentController::class, 'index']);
+// Parents
 Route::post('/parent-login', [ParentAuthController::class, 'login']);
 Route::post('/parent-logout', [ParentAuthController::class, 'logout']);
+Route::get('/parents', [ParentController::class, 'index']);
+Route::post('/parents', [ParentController::class, 'store']);
 
-# ================================
-# Classes
-# ================================
+// Enseignants
+Route::post('/teacher-login', [TeacherAuthController::class, 'login']);
+
+Route::get('/teacher/emploi/{teacherId}', [TeacherAuthController::class, 'getEmploiDuTemps']);
+
+// Login coordinateur via API
+Route::post('/coordinator-login', [CoordinatorAuthController::class, 'login']);
+
+// Classes
 Route::get('/classes', [ClasseController::class, 'index']);
 
-# ================================
-# Modules
-# ================================
+// Modules
 Route::post('/modules', [ModuleController::class, 'store']);
 Route::get('/modules', [ModuleController::class, 'index']);
 
-# ================================
-# Emplois du temps (séances)
-# ================================
-// Route::post('/emplois-du-temps', [SeanceController::class, 'store']);
-Route::get('/emplois-du-temps', [SeanceController::class, 'index']);
-// Dans api.php
+// Emplois du temps (Séances)
+Route::get('/seances', [SeanceController::class, 'index']);
 Route::post('/schedule/store', [SeanceController::class, 'store'])->name('api.schedule.store');
+Route::get('/seances/eleve/{eleveId}', [SeanceController::class, 'getSeancesByEleve']);
 
 
+// Présence
+Route::get('/presences/{sessionId}', [PresenceController::class, 'apiShow']);
+Route::post('/presences/store', [PresenceController::class, 'apiStore']);
+Route::post('/presences/cordstore', [PresenceController::class, 'apiCordStore']);
 
-# ================================
-# Présence
-# ================================
-Route::post('/presence', [PresenceController::class, 'store']);
-Route::get('/presence/{sessionId}', [PresenceController::class, 'show']);
-
-# ================================
-# Graphiques
-# ================================
+// Graphiques
 Route::get('/graphs', [GraphController::class, 'index']);
 Route::get('/taux-par-classe', [GraphController::class, 'tauxParClasse']);
 Route::get('/taux-par-module', [GraphController::class, 'tauxParModule']);

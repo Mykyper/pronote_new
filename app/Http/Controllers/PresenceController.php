@@ -9,108 +9,115 @@ use App\Models\Seance;
 
 class PresenceController extends Controller
 {
+    /**
+     * Afficher la page de présence pour un enseignant
+     */
     public function show($sessionId)
-    {    if (!session()->has('teacher_id')) {
-        return redirect('/teacher/login')->with('error', 'Vous devez être connecté pour enregistrer des données.');
-    }
-        $seance = Seance::findOrFail($sessionId); // Utilisez le modèle correct
+    {
+        if (!session()->has('teacher_id')) {
+            return redirect('/teacher/login')
+                ->with('error', 'Vous devez être connecté pour enregistrer des données.');
+        }
+
+        $seance = Seance::findOrFail($sessionId);
         $eleves = Eleve::where('classe_id', $seance->class_id)->get();
-        
-        return view('presence_prof', [
-            'eleves' => $eleves,
-            'sessionId' => $sessionId,
+
+        return view('presence_prof', compact('eleves', 'sessionId', 'seance'));
+    }
+
+    /**
+     * Récupérer les élèves pour une séance (API)
+     */
+    public function apiShow($sessionId)
+    {
+        // if (!session()->has('teacher_id')) {
+        //     return response()->json([
+        //         'success' => false,
+        //         'message' => 'Vous devez être connecté pour accéder aux données.'
+        //     ], 401);
+        // }
+
+        $seance = Seance::findOrFail($sessionId);
+        $eleves = Eleve::where('classe_id', $seance->class_id)->get();
+
+        return response()->json([
+            'success' => true,
+            'seance' => $seance,
+            'eleves' => $eleves
         ]);
     }
 
-     public function store(Request $request)
-    {    if (!session()->has('teacher_id')) {
-        return redirect('/teacher/login')->with('error', 'Vous devez être connecté pour enregistrer des données.');
-    }
-        $data = $request->input('presences');
-        $sessionId = $request->input('session_id');
+    /**
+     * Enregistrer les présences (enseignant ou coordinateur)
+     */
+    public function apiStore(Request $request)
+    {
+        // // Déterminer le type d'utilisateur
+        // $userType = session()->has('teacher_id') ? 'teacher_id' : (session()->has('coordinator_id') ? 'coordinator_id' : null);
+
+        // if (!$userType) {
+        //     return response()->json([
+        //         'success' => false,
+        //         'message' => 'Vous devez être connecté pour enregistrer les présences.'
+        //     ], 401);
+        // }
+
+        $data = $request->input('presences', []);
+        $seanceId = $request->input('seance_id');
 
         $newPresences = 0;
         $existingPresences = 0;
-
+        if (!$seanceId) {
+    return response()->json([
+        'success' => false,
+        'message' => 'seance_id manquant !'
+    ], 400);
+}
         foreach ($data as $eleveId => $status) {
-            // Vérifier si la présence existe déjà
             $existingPresence = Presence::where('eleve_id', $eleveId)
-                                        ->where('seance_id', $sessionId)
+                                        ->where('seance_id', $seanceId)
                                         ->first();
 
             if ($existingPresence) {
                 $existingPresences++;
-                continue; // Passer au prochain élève si la présence existe déjà
+                continue;
             }
 
-            // Créer une nouvelle présence si elle n'existe pas
             Presence::create([
                 'eleve_id' => $eleveId,
-                'seance_id' => $sessionId,
+                'seance_id' => $seanceId,
                 'status' => $status,
             ]);
             $newPresences++;
         }
 
-        return redirect()->back()->with('success', "$newPresences présences enregistrées avec succès. $existingPresences présences existaient déjà.");
+        return response()->json([
+            'success' => true,
+            'message' => "$newPresences nouvelles présences enregistrées. $existingPresences existaient déjà."
+        ]);
     }
-    public function showPresenceDetails($seance_id)
-{
-      
-      $seance = Seance::findOrFail($seance_id);
 
-    
-      $classe = $seance->classe;
-  
-    
-      $eleves = Eleve::where('classe_id', $classe->id)->get();
-  
-   
-      $presences = Presence::where('seance_id', $seance_id)->get();
-  
-      return view('presence_cord', compact('seance', 'eleves', 'presences'));
-}
-public function cordstore(Request $request)
-{
-     // Vérifier si l'id du coordinateur est stocké dans la session
-    if (!session()->has('coordinator_id')) {
-        return redirect('/coordinator-login')->with('error', 'Vous devez être connecté pour enregistrer les présences.');
-    }
-    // Récupérer les données de présence envoyées depuis le formulaire
-    $data = $request->input('presences');
-    $seanceId = $request->input('seance_id'); // Utiliser 'seance_id' au lieu de 'session_id'
-
-    // Variables pour compter les nouvelles présences et les présences existantes
-    $newPresences = 0;
-    $existingPresences = 0;
-
-    foreach ($data as $eleveId => $status) {
-        // Vérifier si la présence pour cet élève et cette séance existe déjà
-        $existingPresence = Presence::where('eleve_id', $eleveId)
-                                    ->where('seance_id', $seanceId)
-                                    ->first();
-
-        if ($existingPresence) {
-            // Incrémenter le compteur de présences existantes et passer au prochain élève
-            $existingPresences++;
-            continue;
+    /**
+     * Récupérer les présences pour le coordinateur (API)
+     */
+    public function apiShowCord($seanceId)
+    {
+        if (!session()->has('coordinator_id')) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Vous devez être connecté pour accéder aux données.'
+            ], 401);
         }
 
-        // Créer une nouvelle présence si elle n'existe pas déjà
-        Presence::create([
-            'eleve_id' => $eleveId,
-            'seance_id' => $seanceId,
-            'status' => $status,
+        $seance = Seance::findOrFail($seanceId);
+        $eleves = Eleve::where('classe_id', $seance->class_id)->get();
+        $presences = Presence::where('seance_id', $seanceId)->get();
+
+        return response()->json([
+            'success' => true,
+            'seance' => $seance,
+            'eleves' => $eleves,
+            'presences' => $presences
         ]);
-        $newPresences++;
     }
-
-    // Rediriger avec un message de succès incluant le nombre de nouvelles présences créées et celles déjà existantes
-    return redirect()->back()->with('success', "$newPresences nouvelles présences enregistrées avec succès. $existingPresences présences existaient déjà.");
-}
-
-
-    
-    
-
 }
