@@ -63,14 +63,14 @@
                     @foreach ($classes as $class)
                         <a href="{{ route('coord-inter', ['classId' => $class->id]) }}">
                             <button class="tab {{ $classe && $classe->id == $class->id ? 'active' : '' }}">
-                                {{ $class->niveau }} {{ $class->specialité }}
+                                {{ $class->niveau }} {{ $class->specialite }}
                             </button>
                         </a>
                     @endforeach
                 </div>
 
                 @if ($classe)
-                    <h2>Taux de Présence pour les Élèves de {{ $classe->niveau }} {{ $classe->specialité }}</h2>
+                    <h2>Taux de Présence pour les Élèves de {{ $classe->niveau }} {{ $classe->specialite }}</h2>
 
                     <div class="graph-container">
                         <canvas id="tauxPresenceEleveChart"></canvas>

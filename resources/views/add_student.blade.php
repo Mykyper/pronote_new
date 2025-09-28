@@ -426,7 +426,7 @@
                 data.classes.forEach(classe => {
                     const option = document.createElement('option');
                     option.value = classe.id;
-                    option.textContent = `${classe.niveau} - ${classe.specialité}`;
+                    option.textContent = `${classe.niveau} - ${classe.specialite}`;
                     classeSelect.appendChild(option);
                 });
             } catch (error) {

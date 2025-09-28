@@ -13,7 +13,7 @@ class StudentController extends Controller
   {
     public function index(): JsonResponse
 {
-    $eleves = Eleve::with(['classe:id,niveau,specialité', 'parent:id,nom,prenom,email'])
+    $eleves = Eleve::with(['classe:id,niveau,specialite', 'parent:id,nom,prenom,email'])
         ->get(['id', 'nom', 'prenom', 'email', 'classe_id', 'parent_id']);
 
     return response()->json([
@@ -34,7 +34,7 @@ class StudentController extends Controller
     public function create(): JsonResponse
     {
         $parents = ParentModel::all(['id', 'nom', 'prenom', 'email']);
-        $classes = Classe::all(['id', 'niveau', 'specialité']);
+        $classes = Classe::all(['id', 'niveau', 'specialite']);
 
         return response()->json([
             'success' => true,

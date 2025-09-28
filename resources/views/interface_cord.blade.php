@@ -74,7 +74,7 @@
         @if($classe)
     @if(isset($emploiDuTemps) && !empty($emploiDuTemps))
         <div class="timetable">
-            <h2>Emploi du temps pour la classe {{ $classe->niveau }} - {{ $classe->specialité }}</h2>
+            <h2>Emploi du temps pour la classe {{ $classe->niveau }} - {{ $classe->specialite }}</h2>
             <table>
                 <thead>
                     <tr>
@@ -127,7 +127,7 @@
         </div>
     @else
         <div class="no-schedule">
-            <p>L'emploi du temps pour la classe {{ $classe->niveau }} - {{ $classe->specialité }} n'est pas encore créé.</p>
+            <p>L'emploi du temps pour la classe {{ $classe->niveau }} - {{ $classe->specialite }} n'est pas encore créé.</p>
         </div>
     @endif
 @else

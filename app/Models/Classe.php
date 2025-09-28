@@ -10,7 +10,7 @@ class Classe extends Model
     use HasFactory;
 
     protected $fillable = [
-        'niveau', 'specialité'
+        'niveau', 'specialite'
     ];
 
     public function eleves()

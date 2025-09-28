@@ -73,7 +73,7 @@
                 <label for="class">Classe :</label>
                 <select id="class" name="class_id" required style="width: 150px;">
                     @foreach ($classes as $classe)
-                        <option value="{{ $classe->id }}">{{ $classe->niveau }} - {{ $classe->specialité }}</option>
+                        <option value="{{ $classe->id }}">{{ $classe->niveau }} - {{ $classe->specialite }}</option>
                     @endforeach
                 </select>
             </div>

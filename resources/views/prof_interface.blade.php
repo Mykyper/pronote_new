@@ -103,7 +103,7 @@
     @foreach($sessions['matin'] as $session)
       <a href="{{ route('presence.show', ['sessionId' => $session->id]) }}">
         {{ $session->module->nom ?? 'Module inconnu' }}<br>
-        {{ $session->classe->niveau ?? '' }} {{ $session->classe->specialité ?? '' }}<br>
+        {{ $session->classe->niveau ?? '' }} {{ $session->classe->specialite ?? '' }}<br>
       </a>
     @endforeach
   @endif
@@ -115,7 +115,7 @@
     @foreach($sessions['soir'] as $session)
       <a href="{{ route('presence.show', ['sessionId' => $session->id]) }}">
         {{ $session->module->nom ?? 'Module inconnu' }}<br>
-        {{ $session->classe->niveau ?? '' }} {{ $session->classe->specialité ?? '' }}<br>
+        {{ $session->classe->niveau ?? '' }} {{ $session->classe->specialite ?? '' }}<br>
       </a>
     @endforeach
   @endif

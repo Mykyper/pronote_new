@@ -40,7 +40,7 @@ class GraphController extends Controller
                 $totalSeances += $eleve->presences->count();
             }
 
-            $tauxPresencesParClasse[$classe->niveau . ' ' . $classe->specialité] = $totalSeances > 0 
+            $tauxPresencesParClasse[$classe->niveau . ' ' . $classe->specialite] = $totalSeances > 0 
                 ? ($totalPresences / $totalSeances) * 100 
                 : 0;
         }
